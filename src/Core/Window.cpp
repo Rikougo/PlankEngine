@@ -41,10 +41,10 @@ namespace Elys {
         }
         glfwSwapInterval(1);
 
-        ELYS_CORE_INFO("OpenGL specs :");
+        /*ELYS_CORE_INFO("OpenGL specs :");
         ELYS_CORE_INFO("  - Vendor : {0}", glGetString(GL_VENDOR));
         ELYS_CORE_INFO("  - Renderer : {0}", glGetString(GL_RENDERER));
-        ELYS_CORE_INFO("  - Version : {0}", glGetString(GL_VERSION));
+        ELYS_CORE_INFO("  - Version : {0}", glGetString(GL_VERSION));*/
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_STENCIL_TEST);
