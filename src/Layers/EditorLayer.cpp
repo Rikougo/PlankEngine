@@ -104,7 +104,7 @@ namespace Elys {
         mLightSystem->Update(deltaTime);
         mRenderSystem->Update(deltaTime);
 
-        if (mViewportHovered && mCurrentState == EditorState::EDITING) {
+        if ((mViewportHovered || mEditorCamera->IsCapturing() ) && mCurrentState == EditorState::EDITING) {
             auto [mx, my] = ImGui::GetMousePos();
             mx -= mViewport.offset.x;
             my -= mViewport.offset.y;
@@ -112,16 +112,19 @@ namespace Elys {
             auto entityID = mFramebuffer->GetPixel((int)mx, (int)(mViewport.size.y - my), 1);
             mCurrentScene->SetHovered(entityID);
 
-            if (Input::IsMouseButtonPressed(Mouse::ButtonLeft)) {
-                auto mPos = Input::GetMousePosition();
-                mEditorCamera->MouseInput(mPos.x, mPos.y, Mouse::ButtonLeft);
+            bool l_hasMouseInput = false;
+            auto l_pos = Input::GetMousePosition();
+            if (Input::IsMouseButtonPressed(Mouse::ButtonMiddle)) {
+                mEditorCamera->MouseInput(l_pos.x, l_pos.y, Mouse::ButtonMiddle);
+                l_hasMouseInput = true;
             } else if (Input::IsMouseButtonPressed(Mouse::ButtonRight)) {
-                auto mPos = Input::GetMousePosition();
-                mEditorCamera->MouseInput(mPos.x, mPos.y, Mouse::ButtonRight);
-            } else {
-                mEditorCamera->EndCapture();
+                mEditorCamera->MouseInput(l_pos.x, l_pos.y, Mouse::ButtonRight);
+                l_hasMouseInput = true;
+            } else{
+                mEditorCamera->ReleaseInput();
             }
 
+            UpdateCursorState(l_hasMouseInput);
 
             if (!Input::IsKeyPressed(Key::LeftControl)) {
                 glm::vec3 cameraDirection{(Input::IsKeyPressed(Key::A) ? -1.0f : (Input::IsKeyPressed(Key::D) ? 1.0f : 0.0f)),
@@ -130,7 +133,6 @@ namespace Elys {
 
                 mEditorCamera->Pan(cameraDirection * deltaTime);
             }
-
         }
     }
 
@@ -326,6 +328,16 @@ namespace Elys {
         mCurrentScene = std::move(newScene);
 
         InitSystems();
+    }
+    
+    void EditorLayer::UpdateCursorState(bool p_hasMouseInput) {
+        if (p_hasMouseInput && Input::GetCursorMode() == Cursor::Normal) {
+            Input::SetCursorMode(Cursor::Disabled);
+        }
+        
+        if (!p_hasMouseInput && Input::GetCursorMode() == Cursor::Disabled) {
+            Input::SetCursorMode(Cursor::Normal);
+        }
     }
 
     bool EditorLayer::OnKeyPressed(KeyPressedEvent &event) {

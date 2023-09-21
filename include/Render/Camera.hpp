@@ -42,19 +42,19 @@ namespace Elys {
             }
 
             mViewWidth = width;
-            mViewHeight = height;
-            mRatioAspect = width / height;
+            m_viewHeight = height;
+            m_ratioAspect = width / height;
 
-            mDirty = true;
+            m_dirty = true;
         }
       protected:
-        float mFOV = 45.0f;
-        float mViewHeight = 1280.0f, mViewWidth = 720.0f;
-        float mRatioAspect = 16.0f / 9.0f;
-        float mNear = 0.1f;
-        float mFar = 1000.0f;
+        float m_fov = 45.0f;
+        float m_viewHeight = 1280.0f, mViewWidth = 720.0f;
+        float m_ratioAspect = 16.0f / 9.0f;
+        float m_near = 0.1f;
+        float m_far = 1000.0f;
 
-        mutable bool mDirty = true;
+        mutable bool m_dirty = true;
     };
 }
 

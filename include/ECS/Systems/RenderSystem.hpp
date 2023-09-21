@@ -61,10 +61,8 @@ namespace Elys {
                 ELYS_CORE_ERROR("RenderSystem::MainCamera : No camera set on render system.");
             return *mCamera;
         }
-
-        void SetViewportSize(glm::vec2 offset, glm::vec2 size);
+        
         bool OnKeyPressed(KeyPressedEvent &event);
-        // bool OnMouseScroll(MouseScrolledEvent &event);
 
         std::shared_ptr<Framebuffer> GetFramebuffer() { return mFramebuffer; }
 
