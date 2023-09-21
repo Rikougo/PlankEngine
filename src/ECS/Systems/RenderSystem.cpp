@@ -188,16 +188,6 @@ namespace Elys {
         mFramebuffer->Unbind();
     }
 
-    void RenderSystem::SetViewportSize(glm::vec2 offset, glm::vec2 size) {
-        if (mCamera) {
-            mCamera->SetViewSize(size.x, size.y);
-        }
-
-        if (mFramebuffer) {
-            mFramebuffer->Resize(size.x, size.y);
-        }
-    }
-
     bool RenderSystem::OnKeyPressed(KeyPressedEvent &event) {
         if (event.GetKeyCode() == Key::Z && event.GetRepeatCount() == 0)
             mWireframe = !mWireframe;
