@@ -26,46 +26,38 @@ namespace Elys {
         glm::mat4 GetView() const override;
         Frustum GetFrustum() const override;
 
-        void StartCapture() {
-            mCapture = true;
-            mNewCapture = true;
-        }
-
-        void EndCapture() {
-            mCapture = false;
-            mNewCapture = true;
-        }
-
         void Rotate(float deltaT, float deltaP);
         void Zoom(float delta);
         void Pan(glm::vec3 direction);
-        void SetPosition(glm::vec3 newPosition) { mPosition = newPosition; mDirty = true; }
-        void SetTarget(glm::vec3 newTarget) { mForward = glm::normalize(newTarget - mPosition); mDirty = true; }
+        void SetPosition(glm::vec3 newPosition);
+        void SetTarget(glm::vec3 newTarget);
+        
+        bool IsCapturing();
         void MouseInput(float x, float y, MouseCode button) override;
+        void ReleaseInput();
 
-        [[nodiscard]] glm::vec3 GetPosition() const override { return mPosition; }
-        [[nodiscard]] glm::vec3 GetFront() const { return glm::normalize(mForward); }
+        [[nodiscard]] glm::vec3 GetPosition() const override { return m_position; }
+        [[nodiscard]] glm::vec3 GetFront() const { return glm::normalize(m_forward); }
 
       private:
         void UpdateCameraData() const;
 
       public:
-        float speed = 1.0f;
-        float sensitivity = 1.0f;
+        float speed = 20.0f;
+        float sensitivity = 250.0f;
       private:
         // cache data
-        mutable Frustum mFrustum;
-        mutable glm::mat4 mProjection{1.0f};
-        mutable glm::mat4 mView{1.0f};
+        mutable Frustum m_frustum;
+        mutable glm::mat4 m_projection{1.0f};
+        mutable glm::mat4 m_view{1.0f};
 
-        glm::vec3 mPosition{0.0f, 0.0f, 0.0f};
-        glm::vec3 mForward{0.0, 0.0, 1.0f};
-        float mYaw = -90.0f;
-        float mPitch = 0.0f;
-
-        bool mCapture = false;
-        bool mNewCapture = true;
-        float mLastMouseX = 0.0f, mLastMouseY = 0.0f;
+        glm::vec3 m_position{0.0f, 0.0f, 0.0f};
+        glm::vec3 m_forward{0.0, 0.0, 1.0f};
+        float m_yaw = -90.0f;
+        float m_pitch = 0.0f;
+        
+        bool m_newCapture = true;
+        float m_lastMouseX = 0.0f, m_lastMouseY = 0.0f;
     };
 } // namespace Elys
 
