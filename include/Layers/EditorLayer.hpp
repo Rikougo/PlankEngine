@@ -46,6 +46,7 @@ namespace Elys {
         void OnImGuiRender() override;
         void OnEvent(Event& e) override;
       private:
+        void UpdateCursorState(bool p_hasMouseInput);
         bool OnKeyPressed(KeyPressedEvent &event);
 
         void CreateScene();
