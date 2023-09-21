@@ -158,15 +158,16 @@ namespace Elys {
             auto entity = Entity(mCurrentScene.get(), id);
             if (!entity.GetComponent<Node>().InheritedEnabled())
                 continue;
-            auto model = entity.GetComponent<Node>().InheritedTransform();
+            auto const &node = entity.GetComponent<Node>();
+            auto model = node.InheritedTransform();
             auto const &renderer = entity.GetComponent<MeshRenderer>();
 
             auto &mesh = renderer.mesh;
-            auto &material = renderer.material;
 
             mOutlineShader->SetMat4("uModel", model);
+            float l_scale = 1.0f + glm::length(mCamera->GetPosition() - node.InheritedPosition()) * 0.005f;
             auto outlineScale = glm::mat4{1.0};
-            outlineScale = glm::scale(outlineScale, {1.01, 1.01, 1.01});
+            outlineScale = glm::scale(outlineScale, {l_scale, l_scale, l_scale});
             mOutlineShader->SetMat4("uOutlineScale", outlineScale);
             glm::vec4 outlineColor =
                 (id == mCurrentScene->GetSelected())
