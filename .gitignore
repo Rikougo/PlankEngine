@@ -395,6 +395,5 @@ FodyWeavers.xsd
 /.vscode
 
 /cmake-build-*
-CMakeLists.txt
 compile_commands.json
 imgui.ini
