@@ -22,7 +22,6 @@ namespace Elys::GUI {
         void NodeEditor(std::string const &label, Node &node);
         void MeshRenderEditor(std::string const &label, MeshRenderer &meshRenderer);
         void LightEditor(std::string const &label, Light &light);
-        void RigidBodyEditor(std::string const &label, RigidBody &rBody);
         void PlayerEditor(std::string const &label, Player &player);
     };
 }

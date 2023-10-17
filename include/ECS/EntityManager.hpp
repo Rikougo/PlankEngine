@@ -14,9 +14,9 @@
 namespace Elys {
     class EntityManager {
       private:
-        std::queue<EntityID> mAvailableEntities{};
-        std::array<Signature, MAX_ENTITIES> mSignatures{};
-        uint32_t mLivingEntity;
+        std::queue<EntityID> m_availableEntities{};
+        std::array<Signature, MAX_ENTITIES> m_signatures{};
+        uint32_t m_livingEntity;
 
       public:
         EntityManager();

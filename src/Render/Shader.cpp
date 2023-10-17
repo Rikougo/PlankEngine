@@ -5,8 +5,7 @@
 #include "Render/Shader.hpp"
 
 namespace Elys {
-    Shader::Shader(const char *vertexPath, const char *fragmentPath,
-               const char *geometryPath) {
+    Shader::Shader(const char *vertexPath, const char *fragmentPath, const char *geometryPath) {
         // 1. retrieve the vertex/fragment source code from filePath
         std::string vertexCode;
         std::string fragmentCode;
@@ -81,6 +80,7 @@ namespace Elys {
         if (geometryPath != nullptr)
             glDeleteShader(geometry);
     }
+    
     void Shader::CheckCompileErrors(GLuint shader, std::string type) {
         GLint success;
         GLchar infoLog[1024];
@@ -98,8 +98,8 @@ namespace Elys {
             }
         }
     }
-    void Shader::Reload(const char *vertexPath, const char *fragmentPath,
-                        const char *geometryPath) {
+    
+    void Shader::Reload(const char *vertexPath, const char *fragmentPath, const char *geometryPath) {
         glDeleteProgram(mID);
         // 1. retrieve the vertex/fragment source code from filePath
         std::string vertexCode;

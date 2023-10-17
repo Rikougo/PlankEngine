@@ -48,9 +48,6 @@ namespace Elys::GUI {
                     if (ImGui::Selectable("Light", false, entity.HasComponent<Light>() ? ImGuiSelectableFlags_Disabled : 0)) {
                         entity.AddComponent<Light>({});
                     }
-                    if (ImGui::Selectable("RigidBody", false, entity.HasComponent<RigidBody>() ? ImGuiSelectableFlags_Disabled : 0)) {
-                        entity.AddComponent<RigidBody>({});
-                    }
                     if (ImGui::Selectable("Player", false, entity.HasComponent<Player>() ? ImGuiSelectableFlags_Disabled : 0)) {
                         entity.AddComponent<Player>({});
                     }
@@ -95,21 +92,6 @@ namespace Elys::GUI {
                         }
 
                         if (!removed) LightEditor("##Light", entity.GetComponent<Light>());
-                    }
-                }
-
-                if (entity.HasComponent<RigidBody>()) {
-                    if (ImGui::CollapsingHeader("RigidBody", ImGuiTreeNodeFlags_DefaultOpen)) {
-                        bool removed = false;
-                        if (ImGui::BeginPopupContextItem()) {
-                            if (ImGui::Selectable("Remove")) {
-                                entity.RemoveComponent<RigidBody>();
-                                removed = true;
-                            }
-                            ImGui::EndPopup();
-                        }
-
-                        if (!removed) RigidBodyEditor("##RigidBody", entity.GetComponent<RigidBody>());
                     }
                 }
 
@@ -298,83 +280,6 @@ namespace Elys::GUI {
         ImGui::Text("Intensity");
         ImGui::TableNextColumn();
         ImGui::DragFloat("##intensity", &light.intensity, 1.0f, 0.0f, 500.0f, "%0.1f");
-
-        ImGui::EndTable();
-    }
-    void ComponentsEditor::RigidBodyEditor(const std::string &label, RigidBody &rBody) {
-        auto tableFlags = ImGuiTableFlags_NoPadInnerX;
-        ImGui::BeginTable(label.c_str(), 2, tableFlags);
-
-        ImGui::TableSetupColumn("name", ImGuiTableColumnFlags_WidthFixed, 100.0f); // Default to 100.0f
-        ImGui::TableSetupColumn("widget", ImGuiTableColumnFlags_WidthStretch); // Default to auto
-
-        ImGui::TableNextColumn();
-        ImGui::Text("Velocity");
-        ImGui::TableNextColumn();
-        auto v = rBody.Velocity();
-        std::stringstream value; value << v.x << ", " << v.y << ", " << v.z;
-        ImGui::Selectable(value.str().c_str());
-
-        if (ImGui::BeginPopupContextItem()) {
-            if (ImGui::Selectable("Reset velocity")) rBody.ResetVelocity();
-
-            ImGui::EndPopup();
-        }
-
-        ImGui::TableNextColumn();
-        ImGui::Text("Position");
-        ImGui::TableNextColumn();
-        auto pos = rBody.Position();
-        std::stringstream vPos; vPos << pos.x << ", " << pos.y << ", " << pos.z;
-        ImGui::Selectable(vPos.str().c_str());
-
-        ImGui::TableNextColumn();
-        ImGui::Text("OldPosition");
-        ImGui::TableNextColumn();
-        auto oldPos = rBody.OldPosition();
-        std::stringstream vOldPos; vOldPos << oldPos.x << ", " << oldPos.y << ", " << oldPos.z;
-        ImGui::Selectable(vOldPos.str().c_str());
-
-        ImGui::TableNextColumn();
-        ImGui::Text("Restitution coefficient");
-        ImGui::TableNextColumn();
-        ImGui::DragFloat("##COR", &rBody.cor, 0.1f);
-
-        ImGui::TableNextColumn();
-        ImGui::Text("Mass");
-        ImGui::TableNextColumn();
-        ImGui::DragFloat("##mass", &rBody.mass, 0.1f);
-
-        ImGui::TableNextColumn();
-        ImGui::Text("Gravity");
-        ImGui::TableNextColumn();
-        ImGui::Checkbox("##gravity", &rBody.useGravity);
-
-        ImGui::TableNextColumn();
-        ImGui::Text("Kinematic");
-        ImGui::TableNextColumn();
-        ImGui::Checkbox("##kinematic", &rBody.isKinematic);
-
-        ImGui::TableNextColumn();
-        ImGui::Text("Volume");
-        ImGui::TableNextColumn();
-        std::visit(overloaded{
-            [](AABB &aabb) { ImGui::Text("AABB shape is based on Mesh."); },
-            [](OBB &obb) {
-                auto tableFlags = ImGuiTableFlags_NoPadInnerX;
-                ImGui::BeginTable("Volume", 2, tableFlags);
-
-                ImGui::TableSetupColumn("name", ImGuiTableColumnFlags_WidthFixed, 100.0f); // Default to 100.0f
-                ImGui::TableSetupColumn("widget", ImGuiTableColumnFlags_WidthStretch); // Default to auto
-
-                ImGui::TableNextColumn();
-                ImGui::Text("Size");
-                ImGui::TableNextColumn();
-                GUI::SliderVec3("##Size", obb.Size(), 0.1);
-
-                ImGui::EndTable();
-           }
-        }, rBody.GetVolume());
 
         ImGui::EndTable();
     }

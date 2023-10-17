@@ -51,7 +51,7 @@ namespace Elys::Geometry {
 
     class Ray {
       private:
-        glm::vec3 mOrigin{0}, mDirection{0};
+        glm::vec3 m_origin{0}, m_direction{0};
       public:
         Ray() = default;
         Ray(glm::vec3 origin, glm::vec3 direction);

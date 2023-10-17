@@ -13,6 +13,7 @@ namespace Elys {
         mVAO = other.mVAO;
         mPath = other.mPath;
     }
+    
     Mesh::Mesh(Mesh &other) {
         mVertices = other.mVertices;
         mIndices = other.mIndices;

@@ -6,37 +6,36 @@
 
 namespace Elys {
     LayerStack::~LayerStack() {
-        for (Layer *layer : m_Layers) {
+        for (std::shared_ptr <Layer> layer : m_layers) {
             layer->OnDetach();
-            delete layer;
         }
     }
 
-    void LayerStack::PushLayer(Layer *layer) {
-        m_Layers.emplace(m_Layers.begin() + m_LayerInsertIndex, layer);
-        m_LayerInsertIndex++;
+    void LayerStack::PushLayer(std::shared_ptr <Layer> layer) {
+        m_layers.emplace(m_layers.begin() + m_layerInsertIndex, layer);
+        m_layerInsertIndex++;
         layer->OnAttach();
     }
 
-    void LayerStack::PushOverlay(Layer *overlay) {
-        m_Layers.emplace_back(overlay);
+    void LayerStack::PushOverlay(std::shared_ptr <Layer> overlay) {
+        m_layers.emplace_back(overlay);
         overlay->OnAttach();
     }
 
-    void LayerStack::PopLayer(Layer *layer) {
-        auto it = std::find(m_Layers.begin(), m_Layers.begin() + m_LayerInsertIndex, layer);
-        if (it != m_Layers.begin() + m_LayerInsertIndex) {
+    void LayerStack::PopLayer(std::shared_ptr <Layer> layer) {
+        auto it = std::find(m_layers.begin(), m_layers.begin() + m_layerInsertIndex, layer);
+        if (it != m_layers.begin() + m_layerInsertIndex) {
             layer->OnDetach();
-            m_Layers.erase(it);
-            m_LayerInsertIndex--;
+            m_layers.erase(it);
+            m_layerInsertIndex--;
         }
     }
 
-    void LayerStack::PopOverlay(Layer *overlay) {
-        auto it = std::find(m_Layers.begin() + m_LayerInsertIndex, m_Layers.end(), overlay);
-        if (it != m_Layers.end()) {
+    void LayerStack::PopOverlay(std::shared_ptr <Layer> overlay) {
+        auto it = std::find(m_layers.begin() + m_layerInsertIndex, m_layers.end(), overlay);
+        if (it != m_layers.end()) {
             overlay->OnDetach();
-            m_Layers.erase(it);
+            m_layers.erase(it);
         }
     }
 } // namespace Elys

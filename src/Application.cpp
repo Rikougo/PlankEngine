@@ -5,32 +5,30 @@
 #include "Application.hpp"
 
 namespace Elys {
-    Application *Application::sInstance = nullptr;
+    Application* Application::s_instance = nullptr;
 
     Application::Application(std::string name) {
+        Elys::Log::Init();
+        Elys::Profile::Init();
+        
         ELYS_CORE_INFO("[Running app on C++ : {0}]", __cplusplus);
 
-        if (sInstance) {
+        if (s_instance) {
             ELYS_CORE_FATAL("Application instance already exists.");
             exit(-1);
         }
 
-        sInstance = this;
+        s_instance = this;
 
         mWindow = Window::Create(Window::WindowData(std::move(name)));
         mWindow->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
 
         AssetLoader::Init();
 
-        mImGUILayer = new ImGuiLayer();
-        mEditorLayer = new EditorLayer();
-        mLayerStack.PushOverlay(mImGUILayer);
-        mLayerStack.PushLayer(mEditorLayer);
-    }
-
-    Application::~Application() {
-        delete mImGUILayer;
-        delete mEditorLayer;
+        m_imGUILayer = std::make_shared<ImGuiLayer>();
+        m_editorLayer = std::make_shared<EditorLayer>();
+        m_layerStack.PushOverlay(m_imGUILayer);
+        m_layerStack.PushLayer(m_editorLayer);
     }
 
     void Application::Run() {
@@ -51,17 +49,17 @@ namespace Elys {
 
             if (!mMinimized) {
                 time = (float)glfwGetTime();
-                for (Layer *layer : mLayerStack) {
+                for (const std::shared_ptr<Layer>& layer : m_layerStack) {
                     layer->OnUpdate(deltaTime);
                 }
                 Profile::DrawingTime = (float)glfwGetTime() - time;
 
                 time = (float)glfwGetTime();
-                mImGUILayer->Begin();
-                for (Layer *layer : mLayerStack) {
+                m_imGUILayer->Begin();
+                for (const std::shared_ptr<Layer>& layer : m_layerStack) {
                     layer->OnImGuiRender();
                 }
-                mImGUILayer->End();
+                m_imGUILayer->End();
                 Profile::GUITime = (float)glfwGetTime() - time;
             }
             mWindow->OnUpdate();
@@ -73,7 +71,7 @@ namespace Elys {
         dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(Application::OnWindowClose));
         dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(Application::OnWindowResize));
 
-        for (auto it = mLayerStack.rbegin(); it != mLayerStack.rend(); ++it) {
+        for (auto it = m_layerStack.rbegin(); it != m_layerStack.rend(); ++it) {
             if (event.Handled)
                 break;
             (*it)->OnEvent(event);

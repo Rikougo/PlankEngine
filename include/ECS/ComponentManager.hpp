@@ -27,14 +27,14 @@ namespace Elys {
         ComponentArray() : mSize{0} {}
 
         void InsertData(EntityID entity, T &component) {
-            if (mEntityToIndexMap.find(entity) != mEntityToIndexMap.end())
+            if (m_entityToIndexMap.find(entity) != m_entityToIndexMap.end())
                 throw std::runtime_error("Core::ComponentArray<T>::InsertData : "
                                          "Entity already has data attached.");
 
             size_t newIndex = mSize;
-            mEntityToIndexMap[entity] = newIndex;
-            mIndexToEntityMap[newIndex] = entity;
-            mComponentArray[newIndex] = component;
+            m_entityToIndexMap[entity] = newIndex;
+            m_indexToEntityMap[newIndex] = entity;
+            m_componentArray[newIndex] = component;
             ++mSize;
         }
 
@@ -49,16 +49,16 @@ namespace Elys {
             if (!HasData(entity))
                 throw std::runtime_error("RemoveData : Entity not in ComponentArray data.");
 
-            size_t removedIndex = mEntityToIndexMap[entity];
+            size_t removedIndex = m_entityToIndexMap[entity];
             size_t lastIndex = mSize - 1;
-            mComponentArray[removedIndex] = mComponentArray[lastIndex];
+            m_componentArray[removedIndex] = m_componentArray[lastIndex];
 
-            EntityID lastIndexEntity = mIndexToEntityMap[lastIndex];
-            mEntityToIndexMap[lastIndexEntity] = removedIndex;
-            mIndexToEntityMap[removedIndex] = lastIndexEntity;
+            EntityID lastIndexEntity = m_indexToEntityMap[lastIndex];
+            m_entityToIndexMap[lastIndexEntity] = removedIndex;
+            m_indexToEntityMap[removedIndex] = lastIndexEntity;
 
-            mEntityToIndexMap.erase(entity);
-            mIndexToEntityMap.erase(lastIndex);
+            m_entityToIndexMap.erase(entity);
+            m_indexToEntityMap.erase(lastIndex);
 
             --mSize;
         }
@@ -70,33 +70,33 @@ namespace Elys {
             if (!HasData(entity))
                 throw std::runtime_error("GetData : Entity not in ComponentArray data.");
 
-            return mComponentArray[mEntityToIndexMap[entity]];
+            return m_componentArray[m_entityToIndexMap[entity]];
         }
 
         [[nodiscard]] bool HasData(EntityID entity) noexcept {
-            return mEntityToIndexMap.find(entity) != mEntityToIndexMap.end();
+            return m_entityToIndexMap.find(entity) != m_entityToIndexMap.end();
         }
 
         void EntityDestroyed(EntityID entity) noexcept override {
-            if (mEntityToIndexMap.find(entity) != mEntityToIndexMap.end()) {
+            if (m_entityToIndexMap.find(entity) != m_entityToIndexMap.end()) {
                 RemoveData(entity);
             }
         }
 
         EntityID GetEntity(T const &component) {
-            auto it = std::find(mComponentArray.begin(), mComponentArray.end(), component);
+            auto it = std::find(m_componentArray.begin(), m_componentArray.end(), component);
 
-            if (it != mComponentArray.end()) {
-                return mIndexToEntityMap[std::distance(mComponentArray.begin(), it)];
+            if (it != m_componentArray.end()) {
+                return m_indexToEntityMap[std::distance(m_componentArray.begin(), it)];
             }
 
             throw std::runtime_error("No entity found for this component.");
         }
 
       private:
-        std::array<T, MAX_ENTITIES> mComponentArray;
-        std::unordered_map<EntityID, size_t> mEntityToIndexMap;
-        std::unordered_map<size_t, EntityID> mIndexToEntityMap;
+        std::array<T, MAX_ENTITIES> m_componentArray;
+        std::unordered_map<EntityID, size_t> m_entityToIndexMap;
+        std::unordered_map<size_t, EntityID> m_indexToEntityMap;
 
         size_t mSize;
     };
@@ -106,16 +106,16 @@ namespace Elys {
         template <typename T> void RegisterComponent() {
             const char *typeName = typeid(T).name();
 
-            if (mComponentTypes.find(typeName) != mComponentTypes.end())
+            if (m_componentTypes.find(typeName) != m_componentTypes.end())
                 throw std::runtime_error(
                     "Core::ComponentManager::RegisterComponent<T> "
                     ": Component type already registered");
 
-            mComponentTypes.insert({typeName, mNextComponentType});
+            m_componentTypes.insert({typeName, m_nextComponentType});
 
-            mComponentArrays.insert({typeName, std::make_shared<ComponentArray<T>>()});
+            m_componentArrays.insert({typeName, std::make_shared<ComponentArray<T>>()});
 
-            ++mNextComponentType;
+            ++m_nextComponentType;
         }
 
         template <typename ... Args> Signature GetSignature() {
@@ -128,12 +128,12 @@ namespace Elys {
         template <typename T> ComponentType GetComponentType() {
             const char *typeName = typeid(T).name();
 
-            if (mComponentTypes.find(typeName) == mComponentTypes.end())
+            if (m_componentTypes.find(typeName) == m_componentTypes.end())
                 throw std::runtime_error(
                     "Core::ComponentManager::GetComponentType<T> "
                     ": Component type is not registered.");
 
-            return mComponentTypes[typeName];
+            return m_componentTypes[typeName];
         }
 
         template <typename T> T& AddComponent(EntityID entity, T component) {
@@ -161,7 +161,7 @@ namespace Elys {
         }
 
         void EntityDestroyed(EntityID entity) {
-            for (auto const &pair : mComponentArrays) {
+            for (auto const &pair : m_componentArrays) {
                 auto const &component = pair.second;
 
                 component->EntityDestroyed(entity);
@@ -169,22 +169,21 @@ namespace Elys {
         }
 
       private:
-        std::unordered_map<const char *, ComponentType> mComponentTypes{};
-        std::unordered_map<const char *, std::shared_ptr<IComponentArray>>
-            mComponentArrays{};
+        std::unordered_map<const char *, ComponentType> m_componentTypes{};
+        std::unordered_map<const char *, std::shared_ptr<IComponentArray>> m_componentArrays{};
 
-        ComponentType mNextComponentType{};
+        ComponentType m_nextComponentType{};
 
         template <typename T>
         std::shared_ptr<ComponentArray<T>> GetComponentArray() {
             const char *typeName = typeid(T).name();
 
-            if (mComponentTypes.find(typeName) == mComponentTypes.end())
+            if (m_componentTypes.find(typeName) == m_componentTypes.end())
                 throw std::runtime_error(
                     "Core::ComponentManager::GetComponentArray<T> : Component not "
                     "registered.");
 
-            return std::static_pointer_cast<ComponentArray<T>>(mComponentArrays[typeName]);
+            return std::static_pointer_cast<ComponentArray<T>>(m_componentArrays[typeName]);
         }
     };
 } // namespace Core

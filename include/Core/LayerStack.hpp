@@ -5,6 +5,7 @@
 #ifndef ELYS_LAYER_STACK_HPP
 #define ELYS_LAYER_STACK_HPP
 
+#include <memory>
 #include <vector>
 
 #include <Core/Layer.hpp>
@@ -15,32 +16,32 @@ namespace Elys {
         LayerStack() = default;
         ~LayerStack();
 
-        void PushLayer(Layer *layer);
-        void PushOverlay(Layer *overlay);
-        void PopLayer(Layer *layer);
-        void PopOverlay(Layer *overlay);
+        void PushLayer(std::shared_ptr<Layer> layer);
+        void PushOverlay(std::shared_ptr<Layer> overlay);
+        void PopLayer(std::shared_ptr<Layer> layer);
+        void PopOverlay(std::shared_ptr<Layer> overlay);
 
-        std::vector<Layer *>::iterator begin() { return m_Layers.begin(); }
-        std::vector<Layer *>::iterator end() { return m_Layers.end(); }
-        std::vector<Layer *>::reverse_iterator rbegin() { return m_Layers.rbegin(); }
-        std::vector<Layer *>::reverse_iterator rend() { return m_Layers.rend(); }
+        std::vector<std::shared_ptr<Layer>>::iterator begin() { return m_layers.begin(); }
+        std::vector<std::shared_ptr<Layer>>::iterator end() { return m_layers.end(); }
+        std::vector<std::shared_ptr<Layer>>::reverse_iterator rbegin() { return m_layers.rbegin(); }
+        std::vector<std::shared_ptr<Layer>>::reverse_iterator rend() { return m_layers.rend(); }
 
-        [[nodiscard]] std::vector<Layer *>::const_iterator begin() const {
-            return m_Layers.begin();
+        [[nodiscard]] std::vector<std::shared_ptr<Layer>>::const_iterator begin() const {
+            return m_layers.begin();
         }
-        [[nodiscard]] std::vector<Layer *>::const_iterator end() const {
-            return m_Layers.end();
+        [[nodiscard]] std::vector<std::shared_ptr<Layer>>::const_iterator end() const {
+            return m_layers.end();
         }
-        [[nodiscard]] std::vector<Layer *>::const_reverse_iterator rbegin() const {
-            return m_Layers.rbegin();
+        [[nodiscard]] std::vector<std::shared_ptr<Layer>>::const_reverse_iterator rbegin() const {
+            return m_layers.rbegin();
         }
-        [[nodiscard]] std::vector<Layer *>::const_reverse_iterator rend() const {
-            return m_Layers.rend();
+        [[nodiscard]] std::vector<std::shared_ptr<Layer>>::const_reverse_iterator rend() const {
+            return m_layers.rend();
         }
 
       private:
-        std::vector<Layer *> m_Layers;
-        unsigned int m_LayerInsertIndex = 0;
+        std::vector<std::shared_ptr<Layer>> m_layers;
+        unsigned int m_layerInsertIndex = 0;
     };
 }
 

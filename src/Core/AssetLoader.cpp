@@ -187,26 +187,6 @@ namespace Elys {
     }
 
     template<>
-    RigidBody ComponentSerializer::ParseComponent<RigidBody>(std::unordered_map<string, string> const &raw) {
-        RigidBody result{};
-
-        result.mass = std::stof(raw.at("Mass"));
-        result.cor = std::stof(raw.at("COR"));
-
-        result.useGravity = raw.contains("Gravity");
-        result.isKinematic = raw.contains("Kinematic");
-
-        if (raw.contains("OBB") && raw.contains("OBBSize") ) {
-            auto size = ParseVec3(raw.at("OBBSize"));
-            result.GetVolume() = OBB{{0, 0, 0}, size};
-        } else if (raw.contains("AABB")) {
-            result.GetVolume() = AABB{};
-        }
-
-        return result;
-    }
-
-    template<>
     string ComponentSerializer::SerializeComponent<MeshRenderer>(MeshRenderer const &data) {
         std::stringstream ss;
 
@@ -219,28 +199,6 @@ namespace Elys {
         if (data.material.heightMap) ss << "+HeightMap=" << data.material.HeightMapPath();
 
         ss << "+Metallic=" << std::to_string(data.material.metallic) << "+Roughness=" << std::to_string(data.material.roughness);
-
-        return ss.str();
-    }
-
-    template<>
-    string ComponentSerializer::SerializeComponent<RigidBody>(RigidBody const &data) {
-        std::stringstream ss;
-
-        ss << "RigidBody+Mass=" << std::to_string(data.mass) << "+COR=" << std::to_string(data.cor);
-
-        if (data.useGravity)
-            ss << "+Gravity";
-        if (data.isKinematic)
-            ss << "+Kinematic";
-
-        std::visit(overloaded{
-                       [&ss](AABB const &aabb) { ss << "+AABB"; },
-                       [&ss](OBB const &obb){
-                           auto const& size = obb.Size();
-                           ss << "+OBB+OBBSize=" << size.x << "," << size.y << "," << size.z;
-                       }
-                   }, data.GetVolume());
 
         return ss.str();
     }
@@ -309,10 +267,6 @@ namespace Elys {
                 Light component = ParseComponent<Light>(rawComponentsValue);
                 entity.AddComponent(component);
             }
-            else if (componentType == "RigidBody") {
-                RigidBody component = ParseComponent<RigidBody>(rawComponentsValue);
-                entity.AddComponent(component);
-            }
             else if (componentType == "Player") {
                 Player component = ParseComponent<Player>(rawComponentsValue);
                 entity.AddComponent(component);
@@ -335,7 +289,6 @@ namespace Elys {
         if (entity.HasComponent<MeshRenderer>()) ss << SerializeComponent(entity.GetComponent<MeshRenderer>()) << ";";
         if (entity.HasComponent<Light>()) ss << SerializeComponent(entity.GetComponent<Light>()) << ";";
         if (entity.HasComponent<Player>()) ss << SerializeComponent(entity.GetComponent<Player>()) << ";";
-        if (entity.HasComponent<RigidBody>()) ss << SerializeComponent(entity.GetComponent<RigidBody>()) << ";";
 
         return ss.str();
     }

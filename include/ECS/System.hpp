@@ -17,7 +17,7 @@ namespace Elys{
         virtual void AddEntity(EntityID newEntity);
         virtual void RemoveEntity(EntityID removedEntity);
       protected:
-        std::set<EntityID> mEntities;
+        std::set<EntityID> m_entities;
     };
 }
 

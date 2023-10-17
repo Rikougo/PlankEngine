@@ -24,4 +24,4 @@ namespace Elys {
         ComputingBoundingBoxes = 0.0f;
         DrawingMeshes = 0.0f;
     }
-}
+} // namespace Elys

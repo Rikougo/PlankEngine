@@ -53,8 +53,8 @@ namespace Elys::Geometry {
     float Line::Length() const { return glm::length(mStart - mEnd); }
 
     // RAY
-    Ray::Ray(glm::vec3 origin, glm::vec3 direction) : mOrigin(origin), mDirection(direction) {}
-    glm::vec3 Ray::Origin() const { return mOrigin; }
-    glm::vec3 Ray::Direction() const { return mDirection; }
-    void Ray::SetDirection(glm::vec3 direction) { mDirection = direction; }
+    Ray::Ray(glm::vec3 origin, glm::vec3 direction) : m_origin(origin), m_direction(direction) {}
+    glm::vec3 Ray::Origin() const { return m_origin; }
+    glm::vec3 Ray::Direction() const { return m_direction; }
+    void Ray::SetDirection(glm::vec3 direction) { m_direction = direction; }
 }

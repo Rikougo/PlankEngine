@@ -63,7 +63,7 @@ namespace Elys {
 
         // Enable stencil writing to draw full shape on stencil buffer
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
-        for (auto id : mEntities) {
+        for (auto id : m_entities) {
             auto entity = Entity(mCurrentScene.get(), id);
 
             auto const &node = entity.GetComponent<Node>();
@@ -81,22 +81,6 @@ namespace Elys {
 
             auto &mesh = renderer.mesh;
             auto &material = renderer.material;
-
-            if (mDebugMode && entity.HasComponent<RigidBody>()) {
-                auto &RBody = entity.GetComponent<RigidBody>();
-
-                auto &volume = RBody.GetVolume();
-                UpdateBuffers(volume);
-
-                mLineShader->Use();
-                mLineShader->SetMat4("uProjection", mCamera->GetProjection());
-                mLineShader->SetMat4("uView", mCamera->GetView());
-                mLineShader->SetMat4("uModel", model);
-                mLineShader->SetVec3("uLineColor", glm::vec3{0.0f, 1.0f, 0.0f});
-
-                DrawVolume(volume);
-                mShader->Use();
-            }
 
             // drawing on stencil mask
             // DRAWING MESH
@@ -151,7 +135,7 @@ namespace Elys {
         glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
         glStencilMask(0x00);
         glDisable(GL_DEPTH_TEST);
-        for (auto id : mEntities) {
+        for (auto id : m_entities) {
             if (id != mCurrentScene->GetSelected() && id != mCurrentScene->GetHovered())
                 continue;
 

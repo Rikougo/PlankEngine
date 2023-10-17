@@ -6,49 +6,53 @@
 
 namespace Elys {
     Scene::Scene() {
-        mEntityManager = std::make_unique<EntityManager>();
-        mComponentManager = std::make_unique<ComponentManager>();
-        mSystemManager = std::make_unique<SystemManager>();
+        m_entityManager = std::make_unique<EntityManager>();
+        m_componentManager = std::make_unique<ComponentManager>();
+        m_systemManager = std::make_unique<SystemManager>();
 
-        mComponentManager->RegisterComponent<Node>();
-        mComponentManager->RegisterComponent<MeshRenderer>();
-        mComponentManager->RegisterComponent<Light>();
-        mComponentManager->RegisterComponent<Player>();
-        mComponentManager->RegisterComponent<RigidBody>();
+        m_componentManager->RegisterComponent<Node>();
+        m_componentManager->RegisterComponent<MeshRenderer>();
+        m_componentManager->RegisterComponent<Light>();
+        m_componentManager->RegisterComponent<Player>();
     }
 
     Entity Scene::CreateEntity(std::string name) {
-        auto newID = mEntityManager->CreateEntity();
+        auto newID = m_entityManager->CreateEntity();
         auto entity = Entity(this, newID);
         entity.AddComponent(Node{}).name = std::move(name);
 
-        mEntities.insert(newID);
+        m_entities.insert(newID);
 
         ELYS_CORE_INFO("Created entity {0}", newID);
         return entity;
     }
     Entity Scene::EntityFromNode(const Node &component) {
-        auto id = mComponentManager->GetEntity<Node>(component);
+        auto id = m_componentManager->GetEntity<Node>(component);
         return {this, id};
     }
-    Entity Scene::EntityFromID(EntityID id) { return {this, id}; }
+    Entity Scene::EntityFromID(EntityID id) { 
+        return {this, id}; 
+    }
 
-    void Scene::PushToDestroyQueue(EntityID id) { mToDestroy.insert(id); }
+    void Scene::PushToDestroyQueue(EntityID id) { 
+        m_toDestroy.insert(id); 
+    
+    }
     void Scene::ProcessDestroyQueue() {
-        for (auto id : mToDestroy) {
-            if (id == mSelected)
-                mSelected = MAX_ENTITIES;
-            if (id == mHovered)
-                mHovered = MAX_ENTITIES;
+        for (auto id : m_toDestroy) {
+            if (id == m_selected)
+                m_selected = MAX_ENTITIES;
+            if (id == m_hovered)
+                m_hovered = MAX_ENTITIES;
 
-            mEntities.erase(id);
-            mComponentManager->GetComponent<Node>(id).OnDelete();
+            m_entities.erase(id);
+            m_componentManager->GetComponent<Node>(id).OnDelete();
 
-            mSystemManager->EntityDestroyed(id);
-            mComponentManager->EntityDestroyed(id);
-            mEntityManager->DestroyEntity(id);
+            m_systemManager->EntityDestroyed(id);
+            m_componentManager->EntityDestroyed(id);
+            m_entityManager->DestroyEntity(id);
         }
 
-        mToDestroy.clear();
+        m_toDestroy.clear();
     }
 }

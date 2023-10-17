@@ -43,15 +43,6 @@ namespace Elys {
     // Intersect impl
     namespace {
         Geometry::CollisionManifold Volume_IntersectImpl(AABB &left, AABB &right) {
-            /*
-            auto [leftLo, leftHi] = left.GetBounds();
-            auto [rightLo, rightHi] = right.GetBounds();
-
-
-            return (leftLo.x <= rightHi.x && leftHi.x >= rightLo.x) &&
-               (leftLo.y <= rightHi.y && leftHi.y >= rightLo.y) &&
-               (leftLo.z <= rightHi.z && leftHi.z >= rightLo.z);
-            */
             Geometry::CollisionManifold result;
             ResetCollisionManifold(&result);
             return result;
@@ -73,6 +64,8 @@ namespace Elys {
     }
 
     Geometry::CollisionManifold Intersect(Volume &left, Volume &right) {
-        return std::visit<Geometry::CollisionManifold>([&](auto &x, auto &y) { return Volume_IntersectImpl(x, y); }, left, right);
+        return std::visit<Geometry::CollisionManifold>(
+            [&](auto &x, auto &y) { return Volume_IntersectImpl(x, y); }, 
+            left, right);
     }
 } // namespace Elys

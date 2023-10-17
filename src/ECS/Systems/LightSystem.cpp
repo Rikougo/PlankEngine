@@ -26,7 +26,7 @@ namespace Elys {
         mShader->SetMat4("uProjection", mCamera->GetProjection());
         mShader->SetMat4("uView", mCamera->GetView());
         mShader->SetBool("uLightsOn", true);
-        for (auto id : mEntities) {
+        for (auto id : m_entities) {
             if (lightIndex >= MAX_LIGHT) {
                 ELYS_CORE_WARN("More light components than system can handle.");
                 break;
@@ -42,7 +42,7 @@ namespace Elys {
             mShader->SetVec3("uLights[" + std::to_string(lightIndex) + "].position", node.InheritedPosition());
             mShader->SetVec3("uLights[" + std::to_string(lightIndex) + "].color", light.color);
             mShader->SetFloat("uLights[" + std::to_string(lightIndex) + "].intensity", light.intensity);
-            // mShader->SetMat4("uModel", node.InheritedTransform());
+            // m_shader->SetMat4("uModel", node.InheritedTransform());
 
             /*if (!LIGHT_MESH.IsInit()) {
                 ELYS_CORE_WARN("Light mesh not init !");

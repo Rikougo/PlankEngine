@@ -14,7 +14,7 @@ namespace Elys {
       public:
         void Begin();
         void End();
-        void SetBlocking(bool blocking) { mBlockingEvents = blocking; }
+        void SetBlocking(bool blocking) { m_blockingEvents = blocking; }
 
         void OnAttach() override;
         void OnDetach() override;
@@ -23,7 +23,7 @@ namespace Elys {
       private:
         void SetupTheme();
       private:
-        bool mBlockingEvents = false;
+        bool m_blockingEvents = false;
     };
 }
 

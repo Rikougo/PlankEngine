@@ -13,7 +13,7 @@
 namespace Elys {
     class Layer {
       public:
-        explicit Layer(std::string name = "Layer") : mDebugName(std::move(name)) {};
+        explicit Layer(std::string name = "Layer") : m_debugName(std::move(name)) {};
         virtual ~Layer() = default;
 
         /// \Brief
@@ -33,9 +33,9 @@ namespace Elys {
         virtual void OnImGuiRender() {}
         virtual void OnEvent(Event &event) {}
 
-        virtual std::string Name() { return mDebugName; }
+        virtual std::string Name() { return m_debugName; }
       protected:
-        std::string mDebugName;
+        std::string m_debugName;
     };
 }
 

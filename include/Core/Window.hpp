@@ -44,7 +44,7 @@ namespace Elys {
         [[nodiscard]] uint32_t GetWidth() const;
         [[nodiscard]] uint32_t GetHeight() const;
 
-        GLFWwindow* GetGLFWWindow() { return mWindow; }
+        GLFWwindow* GetGLFWWindow() { return m_window; }
 
         void SetEventCallback(const EventCallbackFn &callback);
 
@@ -57,8 +57,8 @@ namespace Elys {
       private:
         void Shutdown();
 
-        GLFWwindow *mWindow;
-        WindowData mData;
+        GLFWwindow *m_window;
+        WindowData m_data;
     };
 } // namespace Elys
 

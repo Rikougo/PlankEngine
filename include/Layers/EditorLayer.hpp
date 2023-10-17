@@ -16,7 +16,6 @@
 #include <ECS/Scene.hpp>
 #include <ECS/Systems/LightSystem.hpp>
 #include <ECS/Systems/RenderSystem.hpp>
-#include <ECS/Systems/PhysicSystem.hpp>
 #include <ECS/Systems/PlayerSystem.hpp>
 
 #include <Core/Event.hpp>
@@ -60,26 +59,25 @@ namespace Elys {
             glm::vec2 offset{0, 0}, size{0, 0};
         };
       private:
-        EditorState mCurrentState{EditorState::EDITING};
-        Viewport mViewport;
-        bool mViewportHovered = false;
-        std::shared_ptr<Scene> mCurrentScene;
+        EditorState m_currentState{EditorState::EDITING};
+        Viewport m_viewport;
+        bool m_viewportHovered = false;
+        std::shared_ptr<Scene> m_currentScene;
 
         // --- SYSTEMS --- //
-        std::shared_ptr<LightSystem> mLightSystem;
-        std::shared_ptr<RenderSystem> mRenderSystem;
-        std::shared_ptr<PhysicSystem> mPhysicSystem;
-        std::shared_ptr<PlayerSystem> mPlayerSystem;
+        std::shared_ptr<LightSystem> m_lightSystem;
+        std::shared_ptr<RenderSystem> m_renderSystem;
+        std::shared_ptr<PlayerSystem> m_playerSystem;
 
         // --- DISPLAY STUFF --- //
-        std::shared_ptr<Framebuffer> mFramebuffer;
-        std::shared_ptr<TrackBallCamera> mEditorCamera;
-        std::shared_ptr<TrackBallCamera> mPlayerCamera;
-        std::shared_ptr<Shader> mShader;
+        std::shared_ptr<Framebuffer> m_framebuffer;
+        std::shared_ptr<TrackBallCamera> m_editorCamera;
+        std::shared_ptr<TrackBallCamera> m_playerCamera;
+        std::shared_ptr<Shader> m_shader;
 
-        GUI::ContentBrowser mContentBrowser{};
-        GUI::GraphScene mGraphScene{};
-        GUI::ComponentsEditor mComponentsEditor{};
+        GUI::ContentBrowser m_contentBrowser{};
+        GUI::GraphScene m_graphScene{};
+        GUI::ComponentsEditor m_componentsEditor{};
     };
 }
 

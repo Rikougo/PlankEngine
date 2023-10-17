@@ -23,8 +23,6 @@ namespace Elys {
         std::string name = "Entity";
       public:
         Node();
-        // Node(Node &node);
-        // Node(Node const &node);
 
         void SetParent(Node* parent);
         void AddChild(Node* child);
@@ -71,20 +69,20 @@ namespace Elys {
         void InvalidateNode() const;
         void UpdateTransform() const;
       private:
-        Node* mParent = nullptr;
-        std::vector<Node*> mChildren;
+        Node*m_parent = nullptr;
+        std::vector<Node*> m_children;
 
-        bool mLocalEnabled = true;
-        glm::vec3 mLocalPosition{0.0f, 0.0f, 0.0f};
-        glm::vec3 mLocalScale{1.0f, 1.0f, 1.0f};
-        glm::quat mLocalRotation{glm::vec3(0.0f, 0.0f, 0.0f)};
-        mutable glm::mat4 mLocalTransform{1.0f};
+        bool m_localEnabled = true;
+        glm::vec3 m_localPosition{0.0f, 0.0f, 0.0f};
+        glm::vec3 m_localScale{1.0f, 1.0f, 1.0f};
+        glm::quat m_localRotation{glm::vec3(0.0f, 0.0f, 0.0f)};
+        mutable glm::mat4 m_localTransform{1.0f};
 
-        mutable glm::vec3 mGlobalPosition{0.0f, 0.0f, 0.0f};
-        mutable glm::vec3 mGlobalScale{1.0f, 1.0f, 1.0f};
-        mutable glm::quat mGlobalRotation{glm::vec3{0.0f, 0.0f, 0.0f}};
-        mutable bool mGlobalUpdated = false;
-        mutable glm::mat4 mGlobalTransform{1.0f};
+        mutable glm::vec3 m_globalPosition{0.0f, 0.0f, 0.0f};
+        mutable glm::vec3 m_globalScale{1.0f, 1.0f, 1.0f};
+        mutable glm::quat m_globalRotation{glm::vec3{0.0f, 0.0f, 0.0f}};
+        mutable bool m_globalUpdated = false;
+        mutable glm::mat4 m_globalTransform{1.0f};
     };
 }
 

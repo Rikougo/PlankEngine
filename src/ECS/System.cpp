@@ -5,6 +5,6 @@
 #include <ECS/System.hpp>
 
 namespace Elys {
-    void System::AddEntity(EntityID newEntity) { mEntities.insert(newEntity); }
-    void System::RemoveEntity(EntityID removedEntity) { mEntities.erase(removedEntity); }
+    void System::AddEntity(EntityID newEntity) { m_entities.insert(newEntity); }
+    void System::RemoveEntity(EntityID removedEntity) { m_entities.erase(removedEntity); }
 }

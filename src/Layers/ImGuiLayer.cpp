@@ -12,7 +12,7 @@
 
 namespace Elys {
     void ImGuiLayer::OnAttach() {
-        mDebugName = "ImGUI";
+        m_debugName = "ImGUI";
 
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -76,7 +76,7 @@ namespace Elys {
     void ImGuiLayer::OnImGuiRender() { }
 
     void ImGuiLayer::OnEvent(Event &event) {
-        event.Handled = event.IsInCategory(EventCategoryInput) && mBlockingEvents;
+        event.Handled = event.IsInCategory(EventCategoryInput) && m_blockingEvents;
     }
 
     void ImGuiLayer::SetupTheme() {

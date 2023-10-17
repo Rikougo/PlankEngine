@@ -14,19 +14,19 @@
 
 namespace Elys {
     void EditorLayer::OnAttach() {
-        mDebugName = "Editor";
+        m_debugName = "Editor";
 
-        mCurrentScene = std::make_shared<Scene>();
-        mShader = std::make_shared<Shader>("./shaders/model_vertex.glsl",
-                                           "./shaders/model_fragment.glsl");
-        mEditorCamera = std::make_shared<TrackBallCamera>();
-        mEditorCamera->SetViewSize(1280, 720);
+        m_currentScene = std::make_shared<Scene>();
+        m_shader = std::make_shared<Shader>("./shaders/model_vertex.glsl",
+                                            "./shaders/model_fragment.glsl");
+        m_editorCamera = std::make_shared<TrackBallCamera>();
+        m_editorCamera->SetViewSize(1280, 720);
 
-        mPlayerCamera = std::make_shared<TrackBallCamera>();
-        mPlayerCamera->SetViewSize(1280, 720);
-        mPlayerCamera->Rotate(0.0f, -0.5f);
+        m_playerCamera = std::make_shared<TrackBallCamera>();
+        m_playerCamera->SetViewSize(1280, 720);
+        m_playerCamera->Rotate(0.0f, -0.5f);
 
-        mFramebuffer = std::make_shared<Framebuffer>(
+        m_framebuffer = std::make_shared<Framebuffer>(
             FramebufferData{.Width = 1280,
                             .Height = 720,
                             .Attachments = {{GL_RGB}, {GL_RED_INTEGER}},
@@ -34,36 +34,20 @@ namespace Elys {
 
         InitSystems();
 
-        auto ground = mCurrentScene->CreateEntity("Ground");
-        ground.GetComponent<Node>().SetPosition(0.0f, -2.0f, 0.0f);
-        ground.GetComponent<Node>().SetScale(glm::vec3{50, 1, 50});
-        ground.AddComponent<MeshRenderer>(
-            {.mesh = AssetLoader::MeshesMap()["Cube"],
-             .material =
-                 Material::FromTexture(
-                     AssetLoader::TextureFromPath("textures/wood_wall/Wood_Wall_003_basecolor.jpg"))
-                     .SetNormalMap(AssetLoader::TextureFromPath(
-                         "textures/wood_wall/Wood_Wall_003_normal.jpg"))
-                     .SetTiling({10, 10})});
-        auto &groundRBody = ground.AddComponent<RigidBody>(RigidBody{ground.GetComponent<Node>().InheritedPosition(),
-                                                 {50.0f, 1.0f, 50.0f},
-                                                 glm::mat3{1.0f}});
-        groundRBody.isKinematic = true;
-
         for(size_t i = 0; i < 5; i++) {
-            auto line = mCurrentScene->CreateEntity("Line"+std::to_string(i));
+            auto line = m_currentScene->CreateEntity("Line" + std::to_string(i));
             for(size_t j = 0; j < 5; j++) {
-                auto entity = mCurrentScene->CreateEntity("Showcase"+std::to_string(j));
+                auto entity = m_currentScene->CreateEntity("Showcase" + std::to_string(j));
                 entity.GetComponent<Node>().SetPosition(i * 2.10f, j * 2.10f, 0.0f);
                 entity.GetComponent<Node>().SetRotation(3.14f, 0.0f, 0.0f);
                 entity.AddComponent<MeshRenderer>({
                     .mesh = AssetLoader::MeshFromPath("Sphere"),
                     .material = Material::FromTexture(AssetLoader::TextureFromPath("textures/lava/lava_COLOR.jpg"))
-                        .SetNormalMap(AssetLoader::TextureFromPath("textures/lava//lava_NORM.png"))
-                        .SetMetallic(0.25f * i)
+                                     .SetNormalMap(AssetLoader::TextureFromPath(
+                                         "textures/lava/lava_NORM.png"))
+                                     .SetMetallic(0.25f * i)
                         .SetRoughness(0.25f * j)
                 });
-                entity.AddComponent<RigidBody>({});
 
                 line.AddChildren(entity);
             }
@@ -71,57 +55,56 @@ namespace Elys {
     }
 
     void EditorLayer::OnDetach() {
-        mLightSystem.reset();
-        mRenderSystem.reset();
-        mPhysicSystem.reset();
-        mPlayerCamera.reset();
+        m_lightSystem.reset();
+        m_renderSystem.reset();
+        m_playerCamera.reset();
 
-        mFramebuffer.reset();
-        mEditorCamera.reset();
-        mPlayerCamera.reset();
-        mShader.reset();
-        mCurrentScene.reset();
+        m_framebuffer.reset();
+        m_editorCamera.reset();
+        m_playerCamera.reset();
+        m_shader.reset();
+        m_currentScene.reset();
     }
 
-    void EditorLayer::OnUpdate(float deltaTime) {
-        // mCurrentScene->ProcessDestroyQueue();
+    void EditorLayer::OnUpdate(float p_deltaTime) {
+        // m_currentScene->ProcessDestroyQueue();
 
         // Framebuffer keep track of viewport size since color attachment is used by viewport for
         // the display. Camera should always be the same size of the Framebuffer.
-        if ((mFramebuffer->GetData().Width != mViewport.size.x ||
-             mFramebuffer->GetData().Height != mViewport.size.y) &&
-            (mViewport.size.x != 0 && mViewport.size.y != 0)) {
-            mFramebuffer->Resize(mViewport.size.x, mViewport.size.y);
-            mEditorCamera->SetViewSize(mViewport.size.x, mViewport.size.y);
-            mPlayerCamera->SetViewSize(mViewport.size.x, mViewport.size.y);
+        if ((m_framebuffer->GetData().Width != m_viewport.size.x ||
+             m_framebuffer->GetData().Height != m_viewport.size.y) &&
+            (m_viewport.size.x != 0 && m_viewport.size.y != 0)) {
+            m_framebuffer->Resize(m_viewport.size.x, m_viewport.size.y);
+            m_editorCamera->SetViewSize(m_viewport.size.x, m_viewport.size.y);
+            m_playerCamera->SetViewSize(m_viewport.size.x, m_viewport.size.y);
         }
 
         // ORDER HERE IS IMPORTANT
-        if (mCurrentState == EditorState::PLAYING) {
-            mPlayerSystem->Update(deltaTime);
+        if (m_currentState == EditorState::PLAYING) {
+            m_playerSystem->Update(p_deltaTime);
         }
-        mPhysicSystem->Update(deltaTime);
-        mLightSystem->Update(deltaTime);
-        mRenderSystem->Update(deltaTime);
+        m_lightSystem->Update(p_deltaTime);
+        m_renderSystem->Update(p_deltaTime);
 
-        if ((mViewportHovered || mEditorCamera->IsCapturing() ) && mCurrentState == EditorState::EDITING) {
+        if ((m_viewportHovered || m_editorCamera->IsCapturing()) &&
+            m_currentState == EditorState::EDITING) {
             auto [mx, my] = ImGui::GetMousePos();
-            mx -= mViewport.offset.x;
-            my -= mViewport.offset.y;
+            mx -= m_viewport.offset.x;
+            my -= m_viewport.offset.y;
 
-            auto entityID = mFramebuffer->GetPixel((int)mx, (int)(mViewport.size.y - my), 1);
-            mCurrentScene->SetHovered(entityID);
+            auto entityID = m_framebuffer->GetPixel((int)mx, (int)(m_viewport.size.y - my), 1);
+            m_currentScene->SetHovered(entityID);
 
             bool l_hasMouseInput = false;
             auto l_pos = Input::GetMousePosition();
             if (Input::IsMouseButtonPressed(Mouse::ButtonMiddle)) {
-                mEditorCamera->MouseInput(l_pos.x, l_pos.y, Mouse::ButtonMiddle);
+                m_editorCamera->MouseInput(l_pos.x, l_pos.y, Mouse::ButtonMiddle);
                 l_hasMouseInput = true;
             } else if (Input::IsMouseButtonPressed(Mouse::ButtonRight)) {
-                mEditorCamera->MouseInput(l_pos.x, l_pos.y, Mouse::ButtonRight);
+                m_editorCamera->MouseInput(l_pos.x, l_pos.y, Mouse::ButtonRight);
                 l_hasMouseInput = true;
             } else{
-                mEditorCamera->ReleaseInput();
+                m_editorCamera->ReleaseInput();
             }
 
             UpdateCursorState(l_hasMouseInput);
@@ -131,7 +114,7 @@ namespace Elys {
                                           (Input::IsKeyPressed(Key::Q) ? -1.0f : (Input::IsKeyPressed(Key::E) ? 1.0f : 0.0f)),
                                           (Input::IsKeyPressed(Key::S) ? -1.0f : (Input::IsKeyPressed(Key::W) ? 1.0f : 0.0f))};
 
-                mEditorCamera->Pan(cameraDirection * deltaTime);
+                m_editorCamera->Pan(cameraDirection * p_deltaTime);
             }
         }
     }
@@ -178,10 +161,10 @@ namespace Elys {
                     if (ImGui::MenuItem("Exit", "Ctrl + Q"))
                         Application::Get().Shutdown();
                     if (ImGui::MenuItem("Save scene", "Ctrl + S"))
-                        AssetLoader::SerializeScene(mCurrentScene, "scene.escene");
+                        AssetLoader::SerializeScene(m_currentScene, "scene.escene");
                     if (ImGui::MenuItem("Reload shader", "Ctrl + R"))
-                        mShader->Reload("./shaders/model_vertex.glsl",
-                                        "./shaders/model_fragment.glsl");
+                        m_shader->Reload("./shaders/model_vertex.glsl",
+                                         "./shaders/model_fragment.glsl");
                     if (ImGui::MenuItem("Toggle playmode", "Ctrl + P"))
                         TogglePlayMode();
 
@@ -202,18 +185,18 @@ namespace Elys {
                     ImGui::TableNextColumn();
                     ImGui::Text("Position");
                     ImGui::TableNextColumn();
-                    auto position = mEditorCamera->GetPosition();
+                    auto position = m_editorCamera->GetPosition();
                     GUI::SliderVec3("##Position", position, 0.1f, false);
 
                     ImGui::TableNextColumn();
                     ImGui::Text("Speed");
                     ImGui::TableNextColumn();
-                    ImGui::DragFloat("##Speed", &mEditorCamera->speed, 0.1f);
+                    ImGui::DragFloat("##Speed", &m_editorCamera->speed, 0.1f);
 
                     ImGui::TableNextColumn();
                     ImGui::Text("Sensitivity");
                     ImGui::TableNextColumn();
-                    ImGui::DragFloat("##Sensitivity", &mEditorCamera->sensitivity, 0.1f);
+                    ImGui::DragFloat("##Sensitivity", &m_editorCamera->sensitivity, 0.1f);
 
                     ImGui::EndTable();
                 }
@@ -234,15 +217,16 @@ namespace Elys {
 
                     ImGui::Text("%0.3fx%0.3f", Input::GetMousePosition().x,
                                 Input::GetMousePosition().y);
-                    ImGui::Text("%0.3fx%0.3f", mViewport.offset.x, mViewport.offset.y);
+                    ImGui::Text("%0.3fx%0.3f", m_viewport.offset.x, m_viewport.offset.y);
                 }
             }
             ImGui::End();
 
-            mGraphScene.OnImGUIRender(mCurrentScene, nullptr);
-            mCurrentScene->ProcessDestroyQueue();
-            mComponentsEditor.OnImGUIRender(mCurrentScene->EntityFromID(mCurrentScene->GetSelected()), nullptr);
-            mContentBrowser.OnImGUIRender(nullptr);
+            m_graphScene.OnImGUIRender(m_currentScene, nullptr);
+            m_currentScene->ProcessDestroyQueue();
+            m_componentsEditor.OnImGUIRender(
+                m_currentScene->EntityFromID(m_currentScene->GetSelected()), nullptr);
+            m_contentBrowser.OnImGUIRender(nullptr);
 
             // Viewport: where the 3D scene is drawn
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{0, 0});
@@ -257,19 +241,19 @@ namespace Elys {
 
                 // it is viewport position in screen space, useful to have relative mouse position
                 // in viewport
-                mViewport.offset = {viewportMinRegion.x + viewportOffset.x,
-                                    viewportMinRegion.y + viewportOffset.y};
-                mViewport.size = {viewportSize.x, viewportSize.y};
+                m_viewport.offset = {viewportMinRegion.x + viewportOffset.x,
+                                     viewportMinRegion.y + viewportOffset.y};
+                m_viewport.size = {viewportSize.x, viewportSize.y};
 
                 // Bind Framebuffer color texture to an ImGui image
-                unsigned int textureID = mRenderSystem->GetFramebuffer()->GetColorTextureID(0);
+                unsigned int textureID = m_renderSystem->GetFramebuffer()->GetColorTextureID(0);
                 ImGui::Image((ImTextureID)((size_t)textureID), viewportSize, ImVec2{0, 1},
                              ImVec2{1, 0});
 
-                mViewportHovered = ImGui::IsWindowHovered();
+                m_viewportHovered = ImGui::IsWindowHovered();
 
                 // If viewport is not hovered, no need to let event goes further than GUI
-                Application::Get().GetImGUILayer().SetBlocking(!mViewportHovered);
+                Application::Get().GetImGUILayer().SetBlocking(!m_viewportHovered);
 
                 if (ImGui::BeginDragDropTarget()) {
                     if (const ImGuiPayload *payload =
@@ -294,11 +278,11 @@ namespace Elys {
 
         dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FN(EditorLayer::OnKeyPressed));
 
-        if (mCurrentState == EditorState::EDITING) {
-            dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FN(mRenderSystem->OnKeyPressed));
+        if (m_currentState == EditorState::EDITING) {
+            dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FN(m_renderSystem->OnKeyPressed));
             dispatcher.Dispatch<MouseScrolledEvent>([this](MouseScrolledEvent &event) {
-                mEditorCamera->Zoom(event.GetYOffset() *
-                                    (Input::IsKeyPressed(Key::LeftShift) ? 10.0f : 0.1f));
+                m_editorCamera->Zoom(event.GetYOffset() *
+                                     (Input::IsKeyPressed(Key::LeftShift) ? 10.0f : 0.1f));
 
                 return false;
             });
@@ -308,12 +292,12 @@ namespace Elys {
                     return false;
 
                 auto [mx, my] = ImGui::GetMousePos();
-                mx -= mViewport.offset.x;
-                my -= mViewport.offset.y;
+                mx -= m_viewport.offset.x;
+                my -= m_viewport.offset.y;
 
-                auto entityID = mFramebuffer->GetPixel((int)mx, (int)(mViewport.size.y - my), 1);
+                auto entityID = m_framebuffer->GetPixel((int)mx, (int)(m_viewport.size.y - my), 1);
 
-                mCurrentScene->SetSelected(entityID);
+                m_currentScene->SetSelected(entityID);
 
                 ELYS_CORE_INFO("Clicked entity {0} at [x: {1}, y: {2}]", entityID, mx, my);
 
@@ -322,10 +306,10 @@ namespace Elys {
         }
     }
 
-    void EditorLayer::CreateScene() { mCurrentScene = std::make_shared<Scene>(); }
+    void EditorLayer::CreateScene() { m_currentScene = std::make_shared<Scene>(); }
 
-    void EditorLayer::ChangeScene(std::shared_ptr<Scene> newScene) {
-        mCurrentScene = std::move(newScene);
+    void EditorLayer::ChangeScene(std::shared_ptr<Scene> p_newScene) {
+        m_currentScene = std::move(p_newScene);
 
         InitSystems();
     }
@@ -353,49 +337,45 @@ namespace Elys {
         }
 
         if (kc == Key::S && Input::IsKeyPressed(Key::LeftControl)) {
-            AssetLoader::SerializeScene(mCurrentScene, "scene.escene");
+            AssetLoader::SerializeScene(m_currentScene, "scene.escene");
         }
 
         if (kc == Key::R && Input::IsKeyPressed(Key::LeftControl)) {
-            mShader->Reload("./shaders/model_vertex.glsl", "./shaders/model_fragment.glsl");
+            m_shader->Reload("./shaders/model_vertex.glsl", "./shaders/model_fragment.glsl");
         }
 
         if (kc == Key::D && Input::IsKeyPressed(Key::LeftControl)) {
-            mRenderSystem->ToggleDebugMode();
+            m_renderSystem->ToggleDebugMode();
         }
 
         return false;
     }
 
     void EditorLayer::InitSystems() {
-        mLightSystem = mCurrentScene->RegisterSystem<LightSystem>(mCurrentScene, mEditorCamera,
-                                                                  mShader, mFramebuffer);
-        mCurrentScene->SetSystemSignature<LightSystem, Light, Node>();
+        m_lightSystem = m_currentScene->RegisterSystem<LightSystem>(m_currentScene, m_editorCamera,
+                                                                    m_shader, m_framebuffer);
+        m_currentScene->SetSystemSignature<LightSystem, Light, Node>();
 
-        mRenderSystem = mCurrentScene->RegisterSystem<RenderSystem>(mCurrentScene, mEditorCamera,
-                                                                    mShader, mFramebuffer);
-        mCurrentScene->SetSystemSignature<RenderSystem, MeshRenderer, Node>();
+        m_renderSystem = m_currentScene->RegisterSystem<RenderSystem>(
+            m_currentScene, m_editorCamera, m_shader, m_framebuffer);
+        m_currentScene->SetSystemSignature<RenderSystem, MeshRenderer, Node>();
 
-        mPhysicSystem = mCurrentScene->RegisterSystem<PhysicSystem>(mCurrentScene);
-        mCurrentScene->SetSystemSignature<PhysicSystem, RigidBody, MeshRenderer, Node>();
-
-        mPlayerSystem = mCurrentScene->RegisterSystem<PlayerSystem>(mCurrentScene, mPlayerCamera);
-        mCurrentScene->SetSystemSignature<PlayerSystem, Player, Node>();
+        m_playerSystem =
+            m_currentScene->RegisterSystem<PlayerSystem>(m_currentScene, m_playerCamera);
+        m_currentScene->SetSystemSignature<PlayerSystem, Player, Node>();
     }
 
     void EditorLayer::TogglePlayMode() {
-        mCurrentState =
-            (mCurrentState == EditorState::EDITING) ? EditorState::PLAYING : EditorState::EDITING;
+        m_currentState =
+            (m_currentState == EditorState::EDITING) ? EditorState::PLAYING : EditorState::EDITING;
 
-        switch (mCurrentState) {
+        switch (m_currentState) {
         case EditorState::EDITING:
-            mRenderSystem->SetCamera(mEditorCamera);
+            m_renderSystem->SetCamera(m_editorCamera);
             break;
         case EditorState::PLAYING:
-            mRenderSystem->SetCamera(mPlayerCamera);
+            m_renderSystem->SetCamera(m_playerCamera);
             break;
         }
-
-        mPhysicSystem->SetPhysicUpdate(mCurrentState == EditorState::PLAYING);
     }
 } // namespace Elys

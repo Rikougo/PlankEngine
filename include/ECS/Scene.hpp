@@ -19,7 +19,6 @@
 #include <ECS/Components/Node.hpp>
 #include <ECS/Components/Light.hpp>
 #include <ECS/Components/MeshRenderer.hpp>
-#include <ECS/Components/RigidBody.hpp>
 #include <ECS/Components/Player.hpp>
 
 // Managers
@@ -38,39 +37,40 @@ namespace Elys {
         Entity EntityFromNode(Node const &component);
         Entity EntityFromID(EntityID id);
 
-        void SetSelected(int id) { mSelected = id; }
-        [[nodiscard]] int GetSelected() const { return mSelected; }
+        void SetSelected(int id) { m_selected = id; }
+        [[nodiscard]] int GetSelected() const { return m_selected; }
 
-        void SetHovered(int id) { mHovered = id; }
-        [[nodiscard]] int GetHovered() const { return mHovered; }
+        void SetHovered(int id) { m_hovered = id; }
+        [[nodiscard]] int GetHovered() const { return m_hovered; }
 
         template<typename T, typename ... Args> std::shared_ptr<T> RegisterSystem(Args&& ... args) {
-            return mSystemManager->RegisterSystem<T>(std::forward<Args>(args)...);
+            return m_systemManager->RegisterSystem<T>(std::forward<Args>(args)...);
         }
         template<typename T, typename ... Components> void SetSystemSignature() {
-            mSystemManager->SetSignature<T>(mComponentManager->GetSignature<Components...>());
+            m_systemManager->SetSignature<T>(m_componentManager->GetSignature<Components...>());
 
-            for(auto entityID : mEntities) {
-                mSystemManager->EntitySignatureChanged(entityID, mEntityManager->GetSignature(entityID));
+            for(auto entityID : m_entities) {
+                m_systemManager->EntitySignatureChanged(entityID,
+                                                       m_entityManager->GetSignature(entityID));
             }
         }
 
         void PushToDestroyQueue(EntityID id);
         void ProcessDestroyQueue();
 
-        std::set<EntityID>::iterator begin() { return mEntities.begin(); }
-        std::set<EntityID>::iterator end() { return mEntities.end(); }
-        [[nodiscard]] std::set<EntityID>::const_iterator begin() const {return mEntities.begin();}
-        [[nodiscard]] std::set<EntityID>::const_iterator end() const { return mEntities.end(); }
+        std::set<EntityID>::iterator begin() { return m_entities.begin(); }
+        std::set<EntityID>::iterator end() { return m_entities.end(); }
+        [[nodiscard]] std::set<EntityID>::const_iterator begin() const {return m_entities.begin();}
+        [[nodiscard]] std::set<EntityID>::const_iterator end() const { return m_entities.end(); }
       private:
-        std::set<EntityID> mEntities;
-        std::set<EntityID> mToDestroy;
+        std::set<EntityID> m_entities;
+        std::set<EntityID> m_toDestroy;
 
-        int mSelected {MAX_ENTITIES}, mHovered {MAX_ENTITIES};
+        int m_selected{MAX_ENTITIES}, m_hovered{MAX_ENTITIES};
 
-        std::unique_ptr<ComponentManager> mComponentManager;
-        std::unique_ptr<EntityManager> mEntityManager;
-        std::unique_ptr<SystemManager> mSystemManager;
+        std::unique_ptr<ComponentManager> m_componentManager;
+        std::unique_ptr<EntityManager> m_entityManager;
+        std::unique_ptr<SystemManager> m_systemManager;
 
         friend class Entity;
     };
@@ -78,43 +78,43 @@ namespace Elys {
     class Entity {
       public:
         Entity() = default;
-        Entity(Scene* scene, EntityID id) : mScene(scene), mID(id) {};
+        Entity(Scene* scene, EntityID id) : m_scene(scene), m_id(id) {};
         Entity(const Entity& other) = default;
 
         ~Entity() = default;
 
         template<typename T> T& AddComponent(T value) const {
-            T& comp = mScene->mComponentManager->AddComponent(mID, value);
+            T& comp = m_scene->m_componentManager->AddComponent(m_id, value);
 
             // CHANGE SIGNATURE OF ENTITY AND UPDATE SYSTEMS
-            Signature newSignature = mScene->mEntityManager->GetSignature(mID);
-            newSignature.set(mScene->mComponentManager->GetComponentType<T>(), true);
-            mScene->mEntityManager->SetSignature(mID, newSignature);
-            mScene->mSystemManager->EntitySignatureChanged(mID, newSignature);
+            Signature newSignature = m_scene->m_entityManager->GetSignature(m_id);
+            newSignature.set(m_scene->m_componentManager->GetComponentType<T>(), true);
+            m_scene->m_entityManager->SetSignature(m_id, newSignature);
+            m_scene->m_systemManager->EntitySignatureChanged(m_id, newSignature);
             return comp;
         }
 
         template<typename T> [[nodiscard]] T& GetComponent() const {
-            return mScene->mComponentManager->GetComponent<T>(mID);
+            return m_scene->m_componentManager->GetComponent<T>(m_id);
         }
 
         template<typename T> void RemoveComponent() const {
-            mScene->mComponentManager->RemoveComponent<T>(mID);
+            m_scene->m_componentManager->RemoveComponent<T>(m_id);
 
             // CHANGE SIGNATURE OF ENTITY AND UPDATE SYSTEMS
-            Signature newSignature = mScene->mEntityManager->GetSignature(mID);
-            newSignature.set(mScene->mComponentManager->GetComponentType<T>(), false);
-            mScene->mEntityManager->SetSignature(mID, newSignature);
-            mScene->mSystemManager->EntitySignatureChanged(mID, newSignature);
+            Signature newSignature = m_scene->m_entityManager->GetSignature(m_id);
+            newSignature.set(m_scene->m_componentManager->GetComponentType<T>(), false);
+            m_scene->m_entityManager->SetSignature(m_id, newSignature);
+            m_scene->m_systemManager->EntitySignatureChanged(m_id, newSignature);
         }
 
         template<typename T> [[nodiscard]] bool HasComponent() const {
-            return mScene->mComponentManager->HasComponent<T>(mID);
+            return m_scene->m_componentManager->HasComponent<T>(m_id);
         }
 
-        void SetParent(Entity &parent) {
+        void SetParent(Entity &p_parent) {
             auto &node = GetComponent<Node>();
-            auto &parentNode = parent.GetComponent<Node>();
+            auto &parentNode = p_parent.GetComponent<Node>();
 
             node.SetParent(&parentNode);
         }
@@ -131,7 +131,7 @@ namespace Elys {
 
             if (!node.Parent()) return {};
 
-            return mScene->EntityFromNode(*node.Parent());
+            return m_scene->EntityFromNode(*node.Parent());
         }
 
         [[nodiscard]] std::vector<Entity> Children() const {
@@ -139,31 +139,31 @@ namespace Elys {
             std::vector<Entity> children;
 
             for (auto childNode : node.Children()) {
-                children.push_back(mScene->EntityFromNode(*childNode));
+                children.push_back(m_scene->EntityFromNode(*childNode));
             }
 
             return children;
         }
 
-        [[nodiscard]] EntityID ID() const { return mID; }
+        [[nodiscard]] EntityID ID() const { return m_id; }
 
-        [[nodiscard]] bool IsValid() const { return mScene != nullptr && mID < MAX_ENTITIES; }
+        [[nodiscard]] bool IsValid() const { return m_scene != nullptr && m_id < MAX_ENTITIES; }
 
         bool operator==(const Entity &other) const {
-            return mID == other.mID && mScene == other.mScene;
+            return m_id == other.m_id && m_scene == other.m_scene;
         }
 
         bool operator<(const Entity &other) const {
-            return mID < other.mID;
+            return m_id < other.m_id;
         }
 
         bool operator>(const Entity &other) const {
-            return mID > other.mID;
+            return m_id > other.m_id;
         }
 
       private:
-        EntityID mID{MAX_ENTITIES};
-        Scene* mScene = nullptr;
+        EntityID m_id{MAX_ENTITIES};
+        Scene*m_scene = nullptr;
     };
 }
 

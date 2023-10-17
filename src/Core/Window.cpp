@@ -10,21 +10,21 @@ namespace Elys {
     }
 
     Window::Window(const WindowData &data) {
-        mData.Width  = data.Width;
-        mData.Height = data.Height;
-        mData.Title  = data.Title;
+        m_data.Width  = data.Width;
+        m_data.Height = data.Height;
+        m_data.Title  = data.Title;
 
         if(glfwInit() == GLFW_FALSE) {
             ELYS_CORE_FATAL("Failed to initialize GLFW.");
             exit(-1);
         }
 
-        mWindow = glfwCreateWindow(mData.Width, mData.Height, mData.Title.c_str(), nullptr, nullptr);
+        m_window = glfwCreateWindow(m_data.Width, m_data.Height, m_data.Title.c_str(), nullptr, nullptr);
 
         GLFWimage icons[1];
         icons[0].pixels = stbi_load("assets/icons/Icon.png", &icons[0].width,
                                     &icons[0].height, nullptr, 4);
-        glfwSetWindowIcon(mWindow, 1, icons);
+        glfwSetWindowIcon(m_window, 1, icons);
         stbi_image_free(icons[0].pixels);
 
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
@@ -34,7 +34,7 @@ namespace Elys {
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
         // creating context
-        glfwMakeContextCurrent(mWindow);
+        glfwMakeContextCurrent(m_window);
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
             ELYS_CORE_FATAL("Failed to initialize GLAD.");
             exit(-1);
@@ -51,10 +51,10 @@ namespace Elys {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
 
-        glfwSetWindowUserPointer(mWindow, &mData);
+        glfwSetWindowUserPointer(m_window, &m_data);
 
         // EVENTS CALLBACKS
-        glfwSetWindowSizeCallback(mWindow, [](GLFWwindow* window, int width, int height){
+        glfwSetWindowSizeCallback(m_window, [](GLFWwindow* window, int width, int height){
             WindowData &wData = *(WindowData*) glfwGetWindowUserPointer(window);
 
             wData.Width = width;
@@ -64,13 +64,13 @@ namespace Elys {
             wData.EventCallback(event);
         });
 
-        glfwSetWindowCloseCallback(mWindow, [](GLFWwindow* window){
+        glfwSetWindowCloseCallback(m_window, [](GLFWwindow* window){
 	    WindowData& wData = *(WindowData*)glfwGetWindowUserPointer(window);
 	    WindowCloseEvent event;
 	    wData.EventCallback(event);
         });
 
-        glfwSetKeyCallback(mWindow, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
+        glfwSetKeyCallback(m_window, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
             WindowData &wData = *(WindowData*) glfwGetWindowUserPointer(window);
 
             switch (action) {
@@ -95,7 +95,7 @@ namespace Elys {
             }
         });
 
-        glfwSetCharCallback(mWindow, [](GLFWwindow* window, unsigned int keycode)
+        glfwSetCharCallback(m_window, [](GLFWwindow* window, unsigned int keycode)
 	{
 	    WindowData& wData = *(WindowData*)glfwGetWindowUserPointer(window);
 
@@ -103,7 +103,8 @@ namespace Elys {
 	    wData.EventCallback(event);
         });
 
-        glfwSetMouseButtonCallback(mWindow, [](GLFWwindow* window, int button, int action, int mods){
+        glfwSetMouseButtonCallback(
+            m_window, [](GLFWwindow* window, int button, int action, int mods){
              WindowData &wData = *(WindowData*) glfwGetWindowUserPointer(window);
 
              switch (action) {
@@ -122,14 +123,14 @@ namespace Elys {
              };
         });
 
-        glfwSetScrollCallback(mWindow, [](GLFWwindow* window, double xoffset, double yoffset) {
+        glfwSetScrollCallback(m_window, [](GLFWwindow* window, double xoffset, double yoffset) {
             WindowData &wData = *(WindowData*) glfwGetWindowUserPointer(window);
 
             MouseScrolledEvent event((float(xoffset)), float(yoffset));
             wData.EventCallback(event);
         });
 
-        glfwSetCursorPosCallback(mWindow, [](GLFWwindow* window, double xpos, double ypos) {
+        glfwSetCursorPosCallback(m_window, [](GLFWwindow* window, double xpos, double ypos) {
              WindowData &wData = *(WindowData*) glfwGetWindowUserPointer(window);
 
              MouseMovedEvent event((float(xpos)), float(ypos));
@@ -139,17 +140,18 @@ namespace Elys {
     Window::~Window() {Shutdown();}
 
     void Window::Shutdown() {
-        glfwDestroyWindow(mWindow);
+        glfwDestroyWindow(m_window);
         glfwTerminate();
     }
 
     void Window::OnUpdate() {
         glfwPollEvents();
-        glfwSwapBuffers(mWindow);
+        glfwSwapBuffers(m_window);
     }
 
-    uint32_t Window::GetWidth() const { return mData.Width; }
-    uint32_t Window::GetHeight() const { return mData.Height; }
+    uint32_t Window::GetWidth() const { return m_data.Width; }
+    uint32_t Window::GetHeight() const { return m_data.Height; }
 
-    void Window::SetEventCallback(const Window::EventCallbackFn &callback) { mData.EventCallback = callback; }
+    void Window::SetEventCallback(const Window::EventCallbackFn &callback) {
+        m_data.EventCallback = callback; }
 } // namespace Elys
