@@ -21,5 +21,11 @@ jobs:
         run: |
           xmake --version
           xmake build -y
-
-  
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifact
+          path: |
+            build
+            !build/.deps
+            !build/.objs
