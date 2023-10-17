@@ -9,6 +9,7 @@
 #include <imgui_impl_opengl3.h>
 
 #include <Application.hpp>
+#include <ImGuizmo.h>
 
 namespace Elys {
     void ImGuiLayer::OnAttach() {
@@ -54,6 +55,8 @@ namespace Elys {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+        ImGuizmo::SetOrthographic(false);
+        ImGuizmo::BeginFrame();
     }
 
     void ImGuiLayer::End() {
@@ -73,7 +76,26 @@ namespace Elys {
         }
     }
 
-    void ImGuiLayer::OnImGuiRender() { }
+    void ImGuiLayer::OnImGuiRender() { 
+        Application &l_application = Application::Get();
+        EditorLayer &l_editorLayer = l_application.GetEditorLayer();
+        TrackBallCamera &l_editorCamera = l_editorLayer.GetEditorCamera();
+        ImGuizmo::SetRect(l_editorLayer.GetViewport().offset.x, l_editorLayer.GetViewport().offset.y, 
+                          l_editorLayer.GetViewport().size.x, l_editorLayer.GetViewport().size.y);
+        ImGuizmo::Manipulate(&l_editorCamera.GetView()[0][0], 
+                             &l_editorCamera.GetProjection()[0][0], 
+                             ImGuizmo::TRANSLATE, 
+                             ImGuizmo::WORLD, 
+                             &glm::mat4{1.0f}[0][0]);
+        
+        float viewManipulateRight = l_editorLayer.GetViewport().offset.x + l_editorLayer.GetViewport().size.x;
+        float viewManipulateTop = l_editorLayer.GetViewport().offset.y;
+        
+        /*ImGuizmo::ViewManipulate(&l_editorCamera.GetView()[0][0], 
+                                 8.0f, 
+                                 ImVec2(viewManipulateRight - 128, viewManipulateTop), 
+                                 ImVec2(128, 128), 0x10101010);*/
+    }
 
     void ImGuiLayer::OnEvent(Event &event) {
         event.Handled = event.IsInCategory(EventCategoryInput) && m_blockingEvents;

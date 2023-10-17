@@ -35,6 +35,10 @@ namespace Elys {
 
     class EditorLayer : public Layer {
       public:
+        struct Viewport {
+            glm::vec2 offset{0, 0}, size{0, 0};
+        };
+      public:
         // --- LIFE CYCLE METHODS --- //
         EditorLayer() = default;
         ~EditorLayer() override = default;
@@ -44,6 +48,14 @@ namespace Elys {
         void OnUpdate(float deltaTime) override;
         void OnImGuiRender() override;
         void OnEvent(Event& e) override;
+        
+        TrackBallCamera &GetEditorCamera() {
+            return *m_editorCamera;
+        }
+        
+        Viewport GetViewport() {
+            return m_viewport;
+        }
       private:
         void UpdateCursorState(bool p_hasMouseInput);
         bool OnKeyPressed(KeyPressedEvent &event);
@@ -54,10 +66,6 @@ namespace Elys {
         void InitSystems();
 
         void TogglePlayMode();
-      public:
-        struct Viewport {
-            glm::vec2 offset{0, 0}, size{0, 0};
-        };
       private:
         EditorState m_currentState{EditorState::EDITING};
         Viewport m_viewport;

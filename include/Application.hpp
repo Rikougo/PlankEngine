@@ -30,6 +30,7 @@ namespace Elys {
 
         Window &GetWindow() { return *mWindow; }
         ImGuiLayer &GetImGUILayer() { return *m_imGUILayer; }
+        EditorLayer &GetEditorLayer() { return *m_editorLayer; }
 
         void OnEvent(Event &event);
 
