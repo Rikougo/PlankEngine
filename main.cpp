@@ -1,4 +1,5 @@
 #define STB_IMAGE_IMPLEMENTATION
+#define IMGUI_DEFINE_MATH_OPERATORS // quick fix for IMGUIZMO
 #include <utility>
 
 #include <Application.hpp>
